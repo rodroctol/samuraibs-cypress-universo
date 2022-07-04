@@ -2,17 +2,18 @@ import signupPage from '../support/pages/signup'
 
 describe('Sign in process', function () {
 
+    before(function () {
+        cy.fixture('signup').then(function (signup) {
+            this.success = signup.success
+            this.email_dup = signup.email_dup
+            this.email_inv = signup.email_inv
+            this.short_password = signup.short_password
+        })
+    })
+
     context('When is a new user', function () {
-
-        const user = {
-            name: 'Rodrigo',
-            email: 'rodrigo@mail.com',
-            password: 'rodrigo123',
-            is_provider: true
-        }
-
         before(function () {
-            cy.task('removeUser', user.email)
+            cy.task('removeUser', this.success.email)
                 .then(function (result) {
                     console.log(result)
                 })
@@ -23,57 +24,33 @@ describe('Sign in process', function () {
         it('should complete the singing up process', function () {
 
             signupPage.go()
-            signupPage.form(user)
+            signupPage.form(this.success)
             signupPage.submit()
             signupPage.toast.shouldHaveText('Agora você se tornou um(a) Samurai, faça seu login para ver seus agendamentos!')
         })
     })
 
     context('When the email is already registered', function () {
-
-        const user = {
-            name: 'Rodrigo',
-            email: 'rodrigo@mail.com',
-            password: 'rodrigo123',
-            is_provider: true
-        }
-
         before(function () {
-            cy.task('removeUser', user.email)
-                .then(function (result) {
-                    console.log(result)
-                })
-
-            cy.request(
-                'POST',
-                'http://localhost:3333/users',
-                user
-            ).then(function (response) {
-                expect(response.status).to.eq(200)
-            })
+            cy.postUser(this.email_dup)
         })
 
         it('should not allow register the same email twice', function () {
 
             signupPage.go()
-            signupPage.form(user)
+            signupPage.form(this.email_dup)
             signupPage.submit()
             signupPage.toast.shouldHaveText('Email já cadastrado para outro usuário.')
         })
     })
 
     context('Validating error message to bad email', function () {
-        const user = {
-            name: 'Rodrigo',
-            email: 'rodrigo.mail.com',
-            password: 'rodrigo123',
-        }
 
         it('should return a error message alert', function () {
             signupPage.go()
-            signupPage.form(user)
+            signupPage.form(this.email_inv)
             signupPage.submit()
-            signupPage.alertHaveText('Informe um email válido')
+            signupPage.alert.haveText('Informe um email válido')
         })
     })
 
@@ -88,15 +65,15 @@ describe('Sign in process', function () {
         passwords.forEach(function (p) {
             it('should not register the user with the password: ' + p, function () {
 
-                const user = { name: 'Jason Friday', email: 'jason@mail.com', password: p }
+                this.short_password.password = p
 
-                signupPage.form(user)
+                signupPage.form(this.short_password)
                 signupPage.submit()
             })
         })
 
         afterEach(function () {
-            signupPage.alertHaveText('Pelo menos 6 caracteres')
+            signupPage.alert.haveText('Pelo menos 6 caracteres')
         })
 
     })
@@ -116,7 +93,7 @@ describe('Sign in process', function () {
 
         alertMessages.forEach(function (alert) {
             it('should show ' + alert.toLowerCase(), function () {
-                signupPage.alertHaveText(alert)
+                signupPage.alert.haveText(alert)
             })
         })
     })

@@ -35,7 +35,40 @@ Cypress.Commands.add('generateFixture', () => {
                 'num_comments': `${faker.datatype.number()}`,
                 'points': `${faker.datatype.number()}`,
                 'objectID': `${faker.datatype.uuid()}`,
+                'email': `${faker.internet.email()}`,
             }
         })
+    })
+})
+
+Cypress.Commands.add('postUser', function (user) {
+    cy.task('removeUser', user.email)
+        .then(function (result) {
+            console.log(result)
+        })
+
+    cy.request(
+        'POST',
+        'http://localhost:3333/users',
+        user
+    ).then(function (response) {
+        expect(response.status).to.eq(200)
+    })
+})
+
+Cypress.Commands.add('recoveryPass', function (email) {
+
+    cy.request(
+        'POST',
+        'http://localhost:3333/password/forgot',
+        { email: email }
+    ).then(function (response) {
+        expect(response.status).to.eq(204)
+
+
+        cy.task('findToken', this.data.email)
+            .then(function (result) {
+                Cypress.env('recoveryToken', result.token)
+            })
     })
 })

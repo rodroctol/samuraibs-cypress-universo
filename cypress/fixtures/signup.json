@@ -1,0 +1,24 @@
+{
+  "success": {
+    "name": "Rodrigo",
+    "email": "rodrigo@mail.com",
+    "password": "rodrigo123"
+  },
+  "email_dup": {
+    "name": "Rodrigo",
+    "email": "rodrigo@mail.com",
+    "password": "rodrigo123",
+    "is_provider": true
+  },
+  "email_inv": {
+    "name": "Rodrigo",
+    "email": "rodrigo.mail.com",
+    "password": "rodrigo123",
+    "is_provider": true
+  },
+  "short_password": {
+    "name": "Jason Friday",
+    "email": "jason@mail.com",
+    "password": null
+  }
+}
